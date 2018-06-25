@@ -72,13 +72,11 @@
 
                 $messageForm.submit(function (e) {
                     e.preventDefault()
-                    console.log('submit sending message')
                     socket.emit('send message', $message.val())
                     $message.val('')
                 })
 
                 $userForm.submit(function (e) {
-                    console.log('user submit')
                     e.preventDefault()
                     socket.emit('new user', $username.val(), function (data) {
                         if (data) {
@@ -90,7 +88,6 @@
                 })
 
                 socket.on('new message', function (data) {
-                    console.log(`at 'new message' event, data is equal to ${data.user} ${data.msg}`)
                     $chat.append('<div class="well"><strong>' + data.user + '</strong>:' + data.msg + '</div>')
 
                 })
