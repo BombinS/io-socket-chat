@@ -11,21 +11,38 @@
     <script src=/socket.io/socket.io.js></script>
     <style>
         body {
-            margin-top: 20px
+            margin-top: 20px;
+
+        }
+
+        #messageArea {
+            display: none;
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <div class="row">
-            <div class="col-md-4">
+        <div id="userFormArea" class="row">
+            <div class="col-md-12">
+                <form id="userForm">
+                    <div class="form-group">
+                        <label>Enter User Name</label>
+                        <input class="form-control" id="username" />
+                        <br/>
+                        <input type="submit" class="btn btn-primary" value="Login" />
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div id="messageArea" class="row ">
+            <div class="col-md-4 ">
                 <div class="well">
                     <h3>Online users</h3>
-                    <ul class="list-group"></ul>
+                    <ul class="list-group" id="users"></ul>
                 </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-8 ">
                 <div class="chat" id="chat"></div>
                 <form id="messageForm">
                     <div class="form-group">
@@ -46,16 +63,44 @@
                 var socket = io.connect();
                 var $messageForm = $('#messageForm')
                 var $message = $('#message')
+                var $messageArea = $('#messageArea')
                 var $chat = $('#chat')
+                var $userFormArea = $('#userFormArea')
+                var $userForm = $('#userForm')
+                var $users = $('#users')
+                var $username = $('#username')
+
                 $messageForm.submit(function (e) {
                     e.preventDefault()
+                    console.log('submit sending message')
                     socket.emit('send message', $message.val())
                     $message.val('')
                 })
 
+                $userForm.submit(function (e) {
+                    console.log('user submit')
+                    e.preventDefault()
+                    socket.emit('new user', $username.val(), function (data) {
+                        if (data) {
+                            $userFormArea.hide()
+                            $messageArea.show()
+                        }
+                    })
+                    $username.val('')
+                })
+
                 socket.on('new message', function (data) {
-                    console.log('new message event' + data.msg)
-                    $chat.append('<div class="well">' + data.msg + '</div>')
+                    console.log(`at 'new message' event, data is equal to ${data.user} ${data.msg}`)
+                    $chat.append('<div class="well"><strong>' + data.user + '</strong>:' + data.msg + '</div>')
+
+                })
+
+                socket.on('get users', function (data) {
+                    var html = ''
+                    for (let i = 0; i < data.length; i++) {
+                        html += '<li class="list-group-item">' + data[i] + '</li>'
+                    }
+                    $users.html(html)
                 })
             }
         )
