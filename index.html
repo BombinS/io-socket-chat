@@ -52,6 +52,11 @@
                     socket.emit('send message', $message.val())
                     $message.val('')
                 })
+
+                socket.on('new message', function (data) {
+                    console.log('new message event' + data.msg)
+                    $chat.append('<div class="well">' + data.msg + '</div>')
+                })
             }
         )
     </script>
